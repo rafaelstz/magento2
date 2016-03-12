@@ -5,6 +5,7 @@
  */
 namespace Magento\Email\Model\Template;
 
+use Magento\Framework\View\Asset\ContentProcessorException;
 use Magento\Framework\View\Asset\ContentProcessorInterface;
 
 /**
@@ -885,10 +886,17 @@ class Filter extends \Magento\Framework\Filter\Template
             );
         }
         $css = '';
-        foreach ($files as $file) {
-            $asset = $this->_assetRepo->createAsset($file, $designParams);
-            $css .= $asset->getContent();
+        try {
+            foreach ($files as $file) {
+                $asset = $this->_assetRepo->createAsset($file, $designParams);
+                $css .= $asset->getContent();
+            }
+        } catch (ContentProcessorException $exception) {
+            $css = $exception->getMessage();
+        } catch (\Magento\Framework\View\Asset\File\NotFoundException $exception) {
+            $css = '';
         }
+
         return $css;
     }
 
@@ -914,7 +922,7 @@ class Filter extends \Magento\Framework\Filter\Template
                     !== false
                 ) {
                     throw new \Magento\Framework\Exception\MailException(
-                        __('<pre>' . PHP_EOL . $cssToInline . PHP_EOL . '</pre>')
+                        __('<pre> %1 </pre>', PHP_EOL . $cssToInline . PHP_EOL)
                     );
                 }
 

@@ -6,6 +6,7 @@
 namespace Magento\CatalogUrlRewrite\Observer;
 
 use Magento\Catalog\Api\ProductRepositoryInterface;
+use Magento\Catalog\Model\Product\Visibility;
 use Magento\CatalogUrlRewrite\Model\ProductUrlRewriteGenerator;
 use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Event\ObserverInterface;
@@ -72,7 +73,9 @@ class ProductToWebsiteChangeObserver implements ObserverInterface
                 UrlRewrite::ENTITY_ID => $product->getId(),
                 UrlRewrite::ENTITY_TYPE => ProductUrlRewriteGenerator::ENTITY_TYPE,
             ]);
-            $this->urlPersist->replace($this->productUrlRewriteGenerator->generate($product));
+            if ($product->getVisibility() != Visibility::VISIBILITY_NOT_VISIBLE) {
+                $this->urlPersist->replace($this->productUrlRewriteGenerator->generate($product));
+            }
         }
     }
 }

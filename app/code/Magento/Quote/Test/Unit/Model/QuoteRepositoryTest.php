@@ -7,7 +7,7 @@
 
 namespace Magento\Quote\Test\Unit\Model;
 
-use \Magento\Quote\Model\QuoteRepository;
+use Magento\Quote\Api\CartRepositoryInterface;
 
 use Magento\Framework\Api\SortOrder;
 use Magento\Framework\Api\ExtensionAttribute\JoinProcessorInterface;
@@ -15,7 +15,7 @@ use Magento\Framework\Api\ExtensionAttribute\JoinProcessorInterface;
 class QuoteRepositoryTest extends \PHPUnit_Framework_TestCase
 {
     /**
-     * @var QuoteRepository
+     * @var \Magento\Quote\Api\CartRepositoryInterface
      */
     protected $model;
 
@@ -107,21 +107,6 @@ class QuoteRepositoryTest extends \PHPUnit_Framework_TestCase
                 'extensionAttributesJoinProcessor' => $this->extensionAttributesJoinProcessorMock
             ]
         );
-    }
-
-    public function testCreate()
-    {
-        $this->quoteFactoryMock->expects($this->once())
-            ->method('create')
-            ->with([1, 2, 3])
-            ->willReturn($this->quoteMock);
-        $this->storeManagerMock->expects($this->never())->method('getStore');
-        $this->storeMock->expects($this->never())->method('getId');
-        $this->quoteMock->expects($this->never())->method('setSharedStoreIds');
-        $this->quoteMock->expects($this->never())->method('load');
-        $this->quoteMock->expects($this->never())->method('getId');
-
-        $this->assertEquals($this->quoteMock, $this->model->create([1, 2, 3]));
     }
 
     /**
@@ -381,7 +366,6 @@ class QuoteRepositoryTest extends \PHPUnit_Framework_TestCase
         $sortOrderMock->expects($this->once())->method('getDirection')->will($this->returnValue($direction));
         $this->quoteCollectionMock->expects($this->once())->method('addOrder')->with('id', $expectedDirection);
 
-
         $searchCriteriaMock->expects($this->once())->method('getCurrentPage')->will($this->returnValue(1));
         $searchCriteriaMock->expects($this->once())->method('getPageSize')->will($this->returnValue(10));
         $this->quoteCollectionMock->expects($this->once())->method('setCurPage')->with(1);
@@ -396,6 +380,18 @@ class QuoteRepositoryTest extends \PHPUnit_Framework_TestCase
         $this->quoteCollectionMock->expects($this->once())->method('getItems')->willReturn([$cartMock]);
         $searchResult->expects($this->once())->method('setItems')->with([$cartMock]);
 
+        $this->model = $this->getMock(
+            'Magento\Quote\Model\QuoteRepository',
+            ['getQuoteCollection'],
+            [
+                'quoteFactory' => $this->quoteFactoryMock,
+                'storeManager' => $this->storeManagerMock,
+                'quoteCollection' => $this->quoteCollectionMock,
+                'searchResultsDataFactory' => $this->searchResultsDataFactory,
+                'extensionAttributesJoinProcessor' => $this->extensionAttributesJoinProcessorMock
+            ]
+        );
+        $this->model->expects($this->once())->method('getQuoteCollection')->willReturn($this->quoteCollectionMock);
         $this->assertEquals($searchResult, $this->model->getList($searchCriteriaMock));
     }
 

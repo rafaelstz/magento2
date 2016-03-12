@@ -34,7 +34,7 @@ class ShippingInformationManagement implements \Magento\Checkout\Api\ShippingInf
     /**
      * Quote repository.
      *
-     * @var \Magento\Quote\Model\QuoteRepository
+     * @var \Magento\Quote\Api\CartRepositoryInterface
      */
     protected $quoteRepository;
 
@@ -71,7 +71,7 @@ class ShippingInformationManagement implements \Magento\Checkout\Api\ShippingInf
      * @param \Magento\Quote\Api\PaymentMethodManagementInterface $paymentMethodManagement
      * @param \Magento\Checkout\Model\PaymentDetailsFactory $paymentDetailsFactory
      * @param \Magento\Quote\Api\CartTotalRepositoryInterface $cartTotalsRepository
-     * @param \Magento\Quote\Model\QuoteRepository $quoteRepository
+     * @param \Magento\Quote\Api\CartRepositoryInterface $quoteRepository
      * @param \Magento\Quote\Model\QuoteAddressValidator $addressValidator
      * @param Logger $logger
      * @param \Magento\Customer\Api\AddressRepositoryInterface $addressRepository
@@ -83,7 +83,7 @@ class ShippingInformationManagement implements \Magento\Checkout\Api\ShippingInf
         \Magento\Quote\Api\PaymentMethodManagementInterface $paymentMethodManagement,
         \Magento\Checkout\Model\PaymentDetailsFactory $paymentDetailsFactory,
         \Magento\Quote\Api\CartTotalRepositoryInterface $cartTotalsRepository,
-        \Magento\Quote\Model\QuoteRepository $quoteRepository,
+        \Magento\Quote\Api\CartRepositoryInterface $quoteRepository,
         QuoteAddressValidator $addressValidator,
         Logger $logger,
         \Magento\Customer\Api\AddressRepositoryInterface $addressRepository,
@@ -104,6 +104,7 @@ class ShippingInformationManagement implements \Magento\Checkout\Api\ShippingInf
     /**
      * {@inheritDoc}
      * @SuppressWarnings(PHPMD.NPathComplexity)
+     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      */
     public function saveAddressInformation(
         $cartId,
@@ -116,6 +117,7 @@ class ShippingInformationManagement implements \Magento\Checkout\Api\ShippingInf
         /** @var \Magento\Quote\Model\Quote $quote */
         $quote = $this->quoteRepository->getActive($cartId);
         $this->validateQuote($quote);
+        $quote->setIsMultiShipping(false);
 
         $saveInAddressBook = $address->getSaveInAddressBook() ? 1 : 0;
         $sameAsBilling = $address->getSameAsBilling() ? 1 : 0;
@@ -127,6 +129,10 @@ class ShippingInformationManagement implements \Magento\Checkout\Api\ShippingInf
         if ($customerAddressId) {
             $addressData = $this->addressRepository->getById($customerAddressId);
             $address = $quote->getShippingAddress()->importCustomerAddressData($addressData);
+        }
+        $billingAddress = $addressInformation->getBillingAddress();
+        if ($billingAddress) {
+            $quote->setBillingAddress($billingAddress);
         }
 
         $address->setSaveInAddressBook($saveInAddressBook);
@@ -143,7 +149,7 @@ class ShippingInformationManagement implements \Magento\Checkout\Api\ShippingInf
             $this->totalsCollector->collectAddressTotals($quote, $address);
         } catch (\Exception $e) {
             $this->logger->critical($e);
-            throw new InputException(__('Unable to save address. Please, check input data.'));
+            throw new InputException(__('Unable to save address. Please check input data.'));
         }
 
         if (!$address->getShippingRateByCode($address->getShippingMethod())) {
@@ -166,7 +172,7 @@ class ShippingInformationManagement implements \Magento\Checkout\Api\ShippingInf
             $this->quoteRepository->save($quote);
         } catch (\Exception $e) {
             $this->logger->critical($e);
-            throw new InputException(__('Unable to save shipping information. Please, check input data.'));
+            throw new InputException(__('Unable to save shipping information. Please check input data.'));
         }
 
         /** @var \Magento\Checkout\Api\Data\PaymentDetailsInterface $paymentDetails */

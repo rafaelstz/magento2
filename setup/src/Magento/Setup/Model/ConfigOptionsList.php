@@ -37,7 +37,6 @@ class ConfigOptionsList implements ConfigOptionsListInterface
     private $validSaveHandlers = [
         ConfigOptionsListConstants::SESSION_SAVE_FILES,
         ConfigOptionsListConstants::SESSION_SAVE_DB,
-        ConfigOptionsListConstants::SESSION_SAVE_REDIS
     ];
 
     /**
@@ -303,7 +302,7 @@ class ConfigOptionsList implements ConfigOptionsListInterface
     private function validateHttpCacheHosts($option)
     {
         $errors = [];
-        if (!preg_match('/^[a-zA-Z0-9_:,.]+$/', $option)
+        if (!preg_match('/^[\-\w:,.]+$/', $option)
         ) {
             $errors[] = "Invalid http cache hosts '{$option}'";
         }

@@ -7,21 +7,45 @@
  */
 namespace Magento\ConfigurableProduct\Block\Adminhtml\Product\Steps;
 
+use Magento\Catalog\Helper\Image;
+use Magento\Catalog\Model\Product;
+use Magento\Catalog\Model\Product\Media\Config;
+use Magento\Catalog\Model\Product\Type;
+use Magento\Catalog\Model\ProductFactory;
+use Magento\Eav\Model\Entity\Attribute;
+use Magento\Framework\View\Element\Template\Context;
+
 class Bulk extends \Magento\Ui\Block\Component\StepsWizard\StepAbstract
 {
-    /** @var \Magento\Catalog\Helper\Image */
+    /** @var Image */
     protected $image;
 
     /**
-     * @param \Magento\Framework\View\Element\Template\Context $context
-     * @param \Magento\Catalog\Helper\Image $image
+     * @var ProductFactory
+     */
+    private $productFactory;
+
+    /**
+     * @var Config
+     */
+    private $catalogProductMediaConfig;
+
+    /**
+     * @param Context $context
+     * @param Image $image
+     * @param Config $catalogProductMediaConfig
+     * @param ProductFactory $productFactory
      */
     public function __construct(
-        \Magento\Framework\View\Element\Template\Context $context,
-        \Magento\Catalog\Helper\Image $image
+        Context $context,
+        Image $image,
+        Config $catalogProductMediaConfig,
+        ProductFactory $productFactory
     ) {
         parent::__construct($context);
         $this->image = $image;
+        $this->productFactory = $productFactory;
+        $this->catalogProductMediaConfig = $catalogProductMediaConfig;
     }
 
     /**
@@ -38,5 +62,36 @@ class Bulk extends \Magento\Ui\Block\Component\StepsWizard\StepAbstract
     public function getNoImageUrl()
     {
         return $this->image->getDefaultPlaceholderUrl('thumbnail');
+    }
+
+    /**
+     * Get image types data
+     *
+     * @return array
+     */
+    public function getImageTypes()
+    {
+        $imageTypes = [];
+        foreach ($this->catalogProductMediaConfig->getMediaAttributeCodes() as $attributeCode) {
+            /* @var $attribute Attribute */
+            $imageTypes[$attributeCode] = [
+                'code' => $attributeCode,
+                'value' => '',
+                'name' => '',
+            ];
+        }
+        return $imageTypes;
+    }
+
+    /**
+     * @return array
+     */
+    public function getMediaAttributes()
+    {
+        static $simple;
+        if (empty($simple)) {
+            $simple = $this->productFactory->create()->setTypeId(Type::TYPE_SIMPLE)->getMediaAttributes();
+        }
+        return $simple;
     }
 }

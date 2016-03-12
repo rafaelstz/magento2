@@ -62,88 +62,74 @@ class UserTest extends \PHPUnit_Framework_TestCase
 
     /**
      * Set required values
+     * @return void
      */
     protected function setUp()
     {
-        $this->userDataMock = $this->getMockBuilder(
-            'Magento\User\Helper\Data'
-        )->disableOriginalConstructor()->setMethods(
-            []
-        )->getMock();
-        $this->contextMock = $this->getMockBuilder(
-            'Magento\Framework\Model\Context'
-        )->disableOriginalConstructor()->setMethods(
-            []
-        )->getMock();
-        $this->resourceMock = $this->getMockBuilder(
-            'Magento\User\Model\ResourceModel\User'
-        )->disableOriginalConstructor()->setMethods(
-            []
-        )->getMock();
-        $this->collectionMock = $this->getMockBuilder(
-            'Magento\Framework\Data\Collection\AbstractDb'
-        )->disableOriginalConstructor()->setMethods(
-            []
-        )->getMockForAbstractClass();
-        $coreRegistry = $this->getMockBuilder(
-            'Magento\Framework\Registry'
-        )->disableOriginalConstructor()->setMethods(
-            []
-        )->getMock();
-        $this->eventManagerMock = $this->getMockBuilder(
-            'Magento\Framework\Event\ManagerInterface'
-        )->disableOriginalConstructor()->setMethods(
-            ['dispatch']
-        )->getMockForAbstractClass();
-        $this->validatorObjectFactoryMock = $this->getMockBuilder(
-            'Magento\Framework\Validator\DataObjectFactory'
-        )->disableOriginalConstructor()->setMethods(
-            ['create']
-        )->getMock();
-        $this->roleFactoryMock = $this->getMockBuilder(
-            'Magento\Authorization\Model\RoleFactory'
-        )->disableOriginalConstructor()->setMethods(
-            ['create']
-        )->getMock();
-        $this->transportMock = $this->getMockBuilder(
-            'Magento\Framework\Mail\TransportInterface'
-        )->disableOriginalConstructor()->setMethods(
-            []
-        )->getMock();
-        $this->transportBuilderMock = $this->getMockBuilder(
-            'Magento\Framework\Mail\Template\TransportBuilder'
-        )->disableOriginalConstructor()->setMethods(
-            []
-        )->getMock();
-        $this->storetMock = $this->getMockBuilder(
-            'Magento\Store\Model\Store'
-        )->disableOriginalConstructor()->setMethods(
-            []
-        )->getMock();
-        $this->storeManagerMock = $this->getMockBuilder(
-            'Magento\Store\Model\StoreManagerInterface'
-        )->disableOriginalConstructor()->setMethods(
-            []
-        )->getMock();
+        $this->userDataMock = $this->getMockBuilder('Magento\User\Helper\Data')
+            ->disableOriginalConstructor()
+            ->setMethods([])
+            ->getMock();
+        $this->contextMock = $this->getMockBuilder('Magento\Framework\Model\Context')
+            ->disableOriginalConstructor()
+            ->setMethods([])
+            ->getMock();
+        $this->resourceMock = $this->getMockBuilder('Magento\User\Model\ResourceModel\User')
+            ->disableOriginalConstructor()
+            ->setMethods([])
+            ->getMock();
+        $this->collectionMock = $this->getMockBuilder('Magento\Framework\Data\Collection\AbstractDb')
+            ->disableOriginalConstructor()
+            ->setMethods([])
+            ->getMockForAbstractClass();
+        $coreRegistry = $this->getMockBuilder('Magento\Framework\Registry')
+            ->disableOriginalConstructor()
+            ->setMethods([])
+            ->getMock();
+        $this->eventManagerMock = $this->getMockBuilder('Magento\Framework\Event\ManagerInterface')
+            ->disableOriginalConstructor()
+            ->setMethods(['dispatch'])
+            ->getMockForAbstractClass();
+        $this->validatorObjectFactoryMock = $this->getMockBuilder('Magento\Framework\Validator\DataObjectFactory')
+            ->disableOriginalConstructor()->setMethods(['create'])
+            ->getMock();
+        $this->roleFactoryMock = $this->getMockBuilder('Magento\Authorization\Model\RoleFactory')
+            ->disableOriginalConstructor()
+            ->setMethods(['create'])
+            ->getMock();
+        $this->transportMock = $this->getMockBuilder('Magento\Framework\Mail\TransportInterface')
+            ->disableOriginalConstructor()
+            ->setMethods([])
+            ->getMock();
+        $this->transportBuilderMock = $this->getMockBuilder('Magento\Framework\Mail\Template\TransportBuilder')
+            ->disableOriginalConstructor()
+            ->setMethods([])
+            ->getMock();
+        $this->storetMock = $this->getMockBuilder('Magento\Store\Model\Store')
+            ->disableOriginalConstructor()
+            ->setMethods([])
+            ->getMock();
+        $this->storeManagerMock = $this->getMockBuilder('Magento\Store\Model\StoreManagerInterface')
+            ->disableOriginalConstructor()
+            ->setMethods([])
+            ->getMock();
 
-        $this->configMock = $this->getMockBuilder(
-            'Magento\Backend\App\ConfigInterface'
-        )->disableOriginalConstructor()->setMethods(
-            []
-        )->getMock();
+        $this->configMock = $this->getMockBuilder('Magento\Backend\App\ConfigInterface')
+            ->disableOriginalConstructor()
+            ->setMethods([])
+            ->getMock();
 
-        $this->validationRulesMock = $this->getMockBuilder(
-            'Magento\User\Model\UserValidationRules'
-        )->disableOriginalConstructor()->setMethods(
-            []
-        )->getMock();
+        $this->validationRulesMock = $this->getMockBuilder('Magento\User\Model\UserValidationRules')
+            ->disableOriginalConstructor()
+            ->setMethods([])
+            ->getMock();
 
         $this->encryptorMock = $this->getMockBuilder('Magento\Framework\Encryption\EncryptorInterface')
             ->setMethods(['validateHash'])
             ->getMockForAbstractClass();
 
-        $helper = new \Magento\Framework\TestFramework\Unit\Helper\ObjectManager($this);
-        $this->model = $helper->getObject(
+        $objectManagerHelper = new \Magento\Framework\TestFramework\Unit\Helper\ObjectManager($this);
+        $this->model = $objectManagerHelper->getObject(
             'Magento\User\Model\User',
             [
                 'eventManager' => $this->eventManagerMock,
@@ -162,95 +148,96 @@ class UserTest extends \PHPUnit_Framework_TestCase
         );
     }
 
-    public function testSendPasswordResetNotificationEmail()
+    /**
+     * @return void
+     */
+    public function testSendNotificationEmailsIfRequired()
     {
         $storeId = 0;
-        $email = 'test@example.com';
+        $email = 'test1@example.com';
+        $origEmail = 'test2@example.com';
+
+        $password = '1234567';
+        $origPassword = '123456789';
+
+        $username = 'admin1';
+        $origUsername = 'admin2';
+
         $firstName = 'Foo';
         $lastName = 'Bar';
 
+        $changes = __('email') . ', ' . __('password') . ', ' . __('username');
+
         $this->model->setEmail($email);
+        $this->model->setOrigData('email', $origEmail);
+
+        $this->model->setPassword($password);
+        $this->model->setOrigData('password', $origPassword);
+
+        $this->model->setUsername($username);
+        $this->model->setOrigData('username', $origUsername);
+
         $this->model->setFirstname($firstName);
         $this->model->setLastname($lastName);
 
-        $this->configMock->expects(
-            $this->at(0)
-        )->method(
-            'getValue'
-        )->with(
-            \Magento\User\Model\User::XML_PATH_RESET_PASSWORD_TEMPLATE
-        )->will(
-            $this->returnValue('templateId')
-        );
-        $this->configMock->expects(
-            $this->at(1)
-        )->method(
-            'getValue'
-        )->with(
-            \Magento\User\Model\User::XML_PATH_FORGOT_EMAIL_IDENTITY
-        )->will(
-            $this->returnValue('sender')
-        );
-        $this->transportBuilderMock->expects($this->once())->method('setTemplateOptions')->will($this->returnSelf());
-        $this->transportBuilderMock->expects(
-            $this->once()
-        )->method(
-            'setTemplateVars'
-        )->with(
-            ['user' => $this->model, 'store' => $this->storetMock]
-        )->will(
-            $this->returnSelf()
-        );
-        $this->transportBuilderMock->expects(
-            $this->once()
-        )->method(
-            'addTo'
-        )->with(
-            $this->equalTo($email),
-            $this->equalTo($firstName . ' ' . $lastName)
-        )->will(
-            $this->returnSelf()
-        );
-        $this->transportBuilderMock->expects(
-            $this->once()
-        )->method(
-            'setFrom'
-        )->with(
-            'sender'
-        )->will(
-            $this->returnSelf()
-        );
-        $this->transportBuilderMock->expects(
-            $this->once()
-        )->method(
-            'setTemplateIdentifier'
-        )->with(
-            'templateId'
-        )->will(
-            $this->returnSelf()
-        );
-        $this->transportBuilderMock->expects(
-            $this->once()
-        )->method(
-            'getTransport'
-        )->will(
-            $this->returnValue($this->transportMock)
-        );
-        $this->transportMock->expects($this->once())->method('sendMessage');
+        $this->configMock->expects($this->exactly(4))
+            ->method('getValue')
+            ->withConsecutive(
+                [\Magento\User\Model\User::XML_PATH_USER_NOTIFICATION_TEMPLATE],
+                [\Magento\User\Model\User::XML_PATH_FORGOT_EMAIL_IDENTITY],
+                [\Magento\User\Model\User::XML_PATH_USER_NOTIFICATION_TEMPLATE],
+                [\Magento\User\Model\User::XML_PATH_FORGOT_EMAIL_IDENTITY]
+            )->willReturnOnConsecutiveCalls(
+                'templateId',
+                'sender',
+                'templateId',
+                'sender'
+            );
 
-        $this->storeManagerMock->expects(
-            $this->once()
-        )->method(
-            'getStore'
-        )->with(
-            $storeId
-        )->will(
-            $this->returnValue($this->storetMock)
-        );
+        $this->transportBuilderMock->expects($this->exactly(2))
+            ->method('setTemplateModel')
+            ->with($this->equalTo('Magento\Email\Model\BackendTemplate'))
+            ->willReturnSelf();
+        $this->transportBuilderMock->expects($this->exactly(2))
+            ->method('setTemplateOptions')
+            ->willReturnSelf();
+        $this->transportBuilderMock->expects($this->exactly(2))
+            ->method('setTemplateVars')
+            ->with(['user' => $this->model, 'store' => $this->storetMock, 'changes' => $changes])
+            ->willReturnSelf();
+        $this->transportBuilderMock->expects($this->exactly(2))
+            ->method('addTo')
+            ->withConsecutive(
+                $this->equalTo($email),
+                $this->equalTo($firstName . ' ' . $lastName),
+                $this->equalTo($origEmail),
+                $this->equalTo($firstName . ' ' . $lastName)
+            )
+            ->willReturnSelf();
+        $this->transportBuilderMock->expects($this->exactly(2))
+            ->method('setFrom')
+            ->with('sender')
+            ->willReturnSelf();
+        $this->transportBuilderMock->expects($this->exactly(2))
+            ->method('setTemplateIdentifier')
+            ->with('templateId')
+            ->willReturnSelf();
+        $this->transportBuilderMock->expects($this->exactly(2))
+            ->method('getTransport')
+            ->willReturn($this->transportMock);
+        $this->transportMock->expects($this->exactly(2))->method('sendMessage');
 
-        $this->assertInstanceOf('\Magento\User\Model\User', $this->model->sendPasswordResetNotificationEmail());
+        $this->storeManagerMock->expects($this->exactly(2))
+            ->method('getStore')
+            ->with($storeId)
+            ->willReturn($this->storetMock);
+
+        $this->assertInstanceOf('\Magento\User\Model\User', $this->model->sendNotificationEmailsIfRequired());
     }
 
+    /**
+     * @return void
+     */
     public function testSendPasswordResetConfirmationEmail()
     {
         $storeId = 0;
@@ -262,84 +249,53 @@ class UserTest extends \PHPUnit_Framework_TestCase
         $this->model->setFirstname($firstName);
         $this->model->setLastname($lastName);
 
-        $this->configMock->expects(
-            $this->at(0)
-        )->method(
-            'getValue'
-        )->with(
-            \Magento\User\Model\User::XML_PATH_FORGOT_EMAIL_TEMPLATE
-        )->will(
-            $this->returnValue('templateId')
-        );
-        $this->configMock->expects(
-            $this->at(1)
-        )->method(
-            'getValue'
-        )->with(
-            \Magento\User\Model\User::XML_PATH_FORGOT_EMAIL_IDENTITY
-        )->will(
-            $this->returnValue('sender')
-        );
-        $this->transportBuilderMock->expects($this->once())->method('setTemplateOptions')->will($this->returnSelf());
-        $this->transportBuilderMock->expects(
-            $this->once()
-        )->method(
-            'setTemplateVars'
-        )->with(
-            ['user' => $this->model, 'store' => $this->storetMock]
-        )->will(
-            $this->returnSelf()
-        );
-        $this->transportBuilderMock->expects(
-            $this->once()
-        )->method(
-            'addTo'
-        )->with(
-            $this->equalTo($email),
-            $this->equalTo($firstName . ' ' . $lastName)
-        )->will(
-            $this->returnSelf()
-        );
-        $this->transportBuilderMock->expects(
-            $this->once()
-        )->method(
-            'setFrom'
-        )->with(
-            'sender'
-        )->will(
-            $this->returnSelf()
-        );
-        $this->transportBuilderMock->expects(
-            $this->once()
-        )->method(
-            'setTemplateIdentifier'
-        )->with(
-            'templateId'
-        )->will(
-            $this->returnSelf()
-        );
-        $this->transportBuilderMock->expects(
-            $this->once()
-        )->method(
-            'getTransport'
-        )->will(
-            $this->returnValue($this->transportMock)
-        );
+        $this->configMock->expects($this->at(0))
+            ->method('getValue')
+            ->with(\Magento\User\Model\User::XML_PATH_FORGOT_EMAIL_TEMPLATE)
+            ->willReturn('templateId');
+        $this->configMock->expects($this->at(1))
+            ->method('getValue')
+            ->with(\Magento\User\Model\User::XML_PATH_FORGOT_EMAIL_IDENTITY)
+            ->willReturn('sender');
+        $this->transportBuilderMock->expects($this->once())
+            ->method('setTemplateModel')
+            ->with($this->equalTo('Magento\Email\Model\BackendTemplate'))
+            ->willReturnSelf();
+        $this->transportBuilderMock->expects($this->once())
+            ->method('setTemplateOptions')
+            ->willReturnSelf();
+        $this->transportBuilderMock->expects($this->once())
+            ->method('setTemplateVars')
+            ->with(['user' => $this->model, 'store' => $this->storetMock])
+            ->willReturnSelf();
+        $this->transportBuilderMock->expects($this->once())
+            ->method('addTo')
+            ->with($this->equalTo($email), $this->equalTo($firstName . ' ' . $lastName))
+            ->willReturnSelf();
+        $this->transportBuilderMock->expects($this->once())
+            ->method('setFrom')
+            ->with('sender')
+            ->willReturnSelf();
+        $this->transportBuilderMock->expects($this->once())
+            ->method('setTemplateIdentifier')
+            ->with('templateId')
+            ->willReturnSelf();
+        $this->transportBuilderMock->expects($this->once())
+            ->method('getTransport')
+            ->willReturn($this->transportMock);
         $this->transportMock->expects($this->once())->method('sendMessage');
 
-        $this->storeManagerMock->expects(
-            $this->once()
-        )->method(
-            'getStore'
-        )->with(
-            $storeId
-        )->will(
-            $this->returnValue($this->storetMock)
-        );
+        $this->storeManagerMock->expects($this->once())
+            ->method('getStore')
+            ->with($storeId)
+            ->willReturn($this->storetMock);
 
         $this->assertInstanceOf('\Magento\User\Model\User', $this->model->sendPasswordResetConfirmationEmail());
     }
 
+    /**
+     * @return void
+     */
     public function testVerifyIdentity()
     {
         $password = 'password';
@@ -347,15 +303,18 @@ class UserTest extends \PHPUnit_Framework_TestCase
             ->expects($this->once())
             ->method('validateHash')
             ->with($password, $this->model->getPassword())
-            ->will($this->returnValue(true));
+            ->willReturn(true);
         $this->model->setIsActive(true);
-        $this->resourceMock->expects($this->once())->method('hasAssigned2Role')->will($this->returnValue(true));
+        $this->resourceMock->expects($this->once())->method('hasAssigned2Role')->willReturn(true);
         $this->assertTrue(
             $this->model->verifyIdentity($password),
             'Identity verification failed while should have passed.'
         );
     }
 
+    /**
+     * @return void
+     */
     public function testVerifyIdentityFailure()
     {
         $password = 'password';
@@ -363,13 +322,16 @@ class UserTest extends \PHPUnit_Framework_TestCase
             ->expects($this->once())
             ->method('validateHash')
             ->with($password, $this->model->getPassword())
-            ->will($this->returnValue(false));
+            ->willReturn(false);
         $this->assertFalse(
             $this->model->verifyIdentity($password),
             'Identity verification passed while should have failed.'
         );
     }
 
+    /**
+     * @return void
+     */
     public function testVerifyIdentityInactiveRecord()
     {
         $password = 'password';
@@ -377,7 +339,7 @@ class UserTest extends \PHPUnit_Framework_TestCase
             ->expects($this->once())
             ->method('validateHash')
             ->with($password, $this->model->getPassword())
-            ->will($this->returnValue(true));
+            ->willReturn(true);
         $this->model->setIsActive(false);
         $this->setExpectedException(
             'Magento\\Framework\\Exception\\AuthenticationException',
@@ -386,6 +348,9 @@ class UserTest extends \PHPUnit_Framework_TestCase
         $this->model->verifyIdentity($password);
     }
 
+    /**
+     * @return void
+     */
     public function testVerifyIdentityNoAssignedRoles()
     {
         $password = 'password';
@@ -393,9 +358,9 @@ class UserTest extends \PHPUnit_Framework_TestCase
             ->expects($this->once())
             ->method('validateHash')
             ->with($password, $this->model->getPassword())
-            ->will($this->returnValue(true));
+            ->willReturn(true);
         $this->model->setIsActive(true);
-        $this->resourceMock->expects($this->once())->method('hasAssigned2Role')->will($this->returnValue(false));
+        $this->resourceMock->expects($this->once())->method('hasAssigned2Role')->willReturn(false);
         $this->setExpectedException(
             'Magento\\Framework\\Exception\\AuthenticationException',
             'You need more permissions to access this.'
@@ -403,6 +368,9 @@ class UserTest extends \PHPUnit_Framework_TestCase
         $this->model->verifyIdentity($password);
     }
 
+    /**
+     * @return void
+     */
     public function testSleep()
     {
         $excludedProperties = [
@@ -425,17 +393,22 @@ class UserTest extends \PHPUnit_Framework_TestCase
         $this->assertEmpty($expectedResult);
     }
 
+    /**
+     * @return void
+     */
     public function testBeforeSave()
     {
         $this->eventManagerMock->expects($this->any())->method('dispatch');
         $this->model->setIsActive(1);
         $actualData = $this->model->beforeSave()->getData();
-        $this->assertArrayHasKey('modified', $actualData);
         $this->assertArrayHasKey('extra', $actualData);
         $this->assertArrayHasKey('password', $actualData);
         $this->assertArrayHasKey('is_active', $actualData);
     }
 
+    /**
+     * @return void
+     */
     public function testValidateOk()
     {
         /** @var $validatorMock \Magento\Framework\Validator\DataObject|\PHPUnit_Framework_MockObject_MockObject */
@@ -451,6 +424,9 @@ class UserTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($this->model->validate());
     }
 
+    /**
+     * @return void
+     */
     public function testValidateInvalid()
     {
         $messages = ['Invalid username'];
@@ -468,6 +444,9 @@ class UserTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($messages, $this->model->validate());
     }
 
+    /**
+     * @return void
+     */
     public function testSaveExtra()
     {
         $data = [1, 2, 3];
@@ -475,12 +454,18 @@ class UserTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf('Magento\User\Model\User', $this->model->saveExtra($data));
     }
 
+    /**
+     * @return void
+     */
     public function testGetRoles()
     {
         $this->resourceMock->expects($this->once())->method('getRoles')->with($this->model)->willReturn([]);
         $this->assertInternalType('array', $this->model->getRoles());
     }
 
+    /**
+     * @return void
+     */
     public function testGetRole()
     {
         $roles = ['role'];
@@ -494,12 +479,18 @@ class UserTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf('Magento\Authorization\Model\Role', $this->model->getRole());
     }
 
+    /**
+     * @return void
+     */
     public function testDeleteFromRole()
     {
         $this->resourceMock->expects($this->once())->method('deleteFromRole')->with($this->model);
         $this->assertInstanceOf('Magento\User\Model\User', $this->model->deleteFromRole());
     }
 
+    /**
+     * @return void
+     */
     public function testRoleUserExistsTrue()
     {
         $result = ['role'];
@@ -507,6 +498,9 @@ class UserTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($this->model->roleUserExists());
     }
 
+    /**
+     * @return void
+     */
     public function testRoleUserExistsFalse()
     {
         $result = [];
@@ -514,6 +508,9 @@ class UserTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($this->model->roleUserExists());
     }
 
+    /**
+     * @return void
+     */
     public function testGetAclRole()
     {
         $roles = ['role'];
@@ -531,6 +528,10 @@ class UserTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @dataProvider authenticateDataProvider
+     * @param string $usernameIn
+     * @param string $usernameOut
+     * @param bool $expectedResult
+     * @return void
      */
     public function testAuthenticate($usernameIn, $usernameOut, $expectedResult)
     {
@@ -553,6 +554,9 @@ class UserTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($expectedResult, $this->model->authenticate($usernameIn, $password));
     }
 
+    /**
+     * @return array
+     */
     public function authenticateDataProvider()
     {
         return [
@@ -571,6 +575,7 @@ class UserTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @expectedException \Magento\Framework\Exception\LocalizedException
+     * @return void
      */
     public function testAuthenticateException()
     {
@@ -590,6 +595,9 @@ class UserTest extends \PHPUnit_Framework_TestCase
         $this->model->authenticate($username, $password);
     }
 
+    /**
+     * @return void
+     */
     public function testChangeResetPasswordLinkToken()
     {
         $token = '1';
@@ -598,11 +606,17 @@ class UserTest extends \PHPUnit_Framework_TestCase
         $this->assertInternalType('string', $this->model->getRpTokenCreatedAt());
     }
 
+    /**
+     * @return void
+     */
     public function testIsResetPasswordLinkTokenExpiredEmptyToken()
     {
         $this->assertTrue($this->model->isResetPasswordLinkTokenExpired());
     }
 
+    /**
+     * @return void
+     */
     public function testIsResetPasswordLinkTokenExpiredIsExpiredToken()
     {
         $this->model->setRpToken('1');
@@ -613,6 +627,9 @@ class UserTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($this->model->isResetPasswordLinkTokenExpired());
     }
 
+    /**
+     * @return void
+     */
     public function testIsResetPasswordLinkTokenExpiredIsNotExpiredToken()
     {
         $this->model->setRpToken('1');
@@ -621,5 +638,158 @@ class UserTest extends \PHPUnit_Framework_TestCase
         );
         $this->userDataMock->expects($this->once())->method('getResetPasswordLinkExpirationPeriod')->willReturn(1);
         $this->assertFalse($this->model->isResetPasswordLinkTokenExpired());
+    }
+
+    public function testCheckPasswordChangeEqualToCurrent()
+    {
+        /** @var $validatorMock \Magento\Framework\Validator\DataObject|\PHPUnit_Framework_MockObject_MockObject */
+        $validatorMock = $this->getMockBuilder('Magento\Framework\Validator\DataObject')
+            ->disableOriginalConstructor()
+            ->setMethods([])
+            ->getMock();
+        $this->validatorObjectFactoryMock->expects($this->once())->method('create')->willReturn($validatorMock);
+        $this->validationRulesMock->expects($this->once())
+            ->method('addUserInfoRules')
+            ->with($validatorMock);
+        $validatorMock->expects($this->once())->method('isValid')->willReturn(true);
+
+        $newPassword = "NEWmYn3wpassw0rd";
+        $oldPassword = "OLDmYn3wpassw0rd";
+        $this->model->setPassword($newPassword)
+            ->setId(1)
+            ->setOrigData('password', $oldPassword);
+        $this->encryptorMock->expects($this->once())
+            ->method('isValidHash')
+            ->with($newPassword, $oldPassword)
+            ->willReturn(true);
+        $result = $this->model->validate();
+        $this->assertInternalType('array', $result);
+        $this->assertCount(1, $result);
+        $this->assertContains("Sorry, but this password has already been used.", (string)$result[0]);
+    }
+
+    public function testCheckPasswordChangeEqualToPrevious()
+    {
+        /** @var $validatorMock \Magento\Framework\Validator\DataObject|\PHPUnit_Framework_MockObject_MockObject */
+        $validatorMock = $this->getMockBuilder('Magento\Framework\Validator\DataObject')
+            ->disableOriginalConstructor()
+            ->setMethods([])
+            ->getMock();
+        $this->validatorObjectFactoryMock->expects($this->once())->method('create')->willReturn($validatorMock);
+        $this->validationRulesMock->expects($this->once())
+            ->method('addUserInfoRules')
+            ->with($validatorMock);
+        $validatorMock->expects($this->once())->method('isValid')->willReturn(true);
+
+        $newPassword = "NEWmYn3wpassw0rd";
+        $newPasswordHash = "new password hash";
+        $oldPassword = "OLDmYn3wpassw0rd";
+        $this->model->setPassword($newPassword)
+            ->setId(1)
+            ->setOrigData('password', $oldPassword);
+        $this->encryptorMock->expects($this->atLeastOnce())
+            ->method('isValidHash')
+            ->will($this->onConsecutiveCalls(false, true));
+
+        $this->resourceMock->expects($this->once())->method('getOldPasswords')->willReturn(['hash1', $newPasswordHash]);
+
+        $result = $this->model->validate();
+        $this->assertInternalType('array', $result);
+        $this->assertCount(1, $result);
+        $this->assertContains("Sorry, but this password has already been used.", (string)$result[0]);
+    }
+
+    public function testCheckPasswordChangeValid()
+    {
+        /** @var $validatorMock \Magento\Framework\Validator\DataObject|\PHPUnit_Framework_MockObject_MockObject */
+        $validatorMock = $this->getMockBuilder('Magento\Framework\Validator\DataObject')
+            ->disableOriginalConstructor()
+            ->setMethods([])
+            ->getMock();
+        $this->validatorObjectFactoryMock->expects($this->once())->method('create')->willReturn($validatorMock);
+        $this->validationRulesMock->expects($this->once())
+            ->method('addUserInfoRules')
+            ->with($validatorMock);
+        $validatorMock->expects($this->once())->method('isValid')->willReturn(true);
+
+        $newPassword = "NEWmYn3wpassw0rd";
+        $oldPassword = "OLDmYn3wpassw0rd";
+        $this->model->setPassword($newPassword)
+            ->setId(1)
+            ->setOrigData('password', $oldPassword);
+        $this->encryptorMock->expects($this->atLeastOnce())
+            ->method('isValidHash')
+            ->will($this->onConsecutiveCalls(false, false, false));
+
+        $this->resourceMock->expects($this->once())->method('getOldPasswords')->willReturn(['hash1', 'hash2']);
+
+        $result = $this->model->validate();
+        $this->assertTrue($result);
+    }
+
+    /**
+     * Test for performIdentityCheck method
+     *
+     * @param bool $verifyIdentityResult
+     * @param bool $lockExpires
+     * @dataProvider dataProviderPerformIdentityCheck
+     */
+    public function testPerformIdentityCheck($verifyIdentityResult, $lockExpires)
+    {
+        $password = 'qwerty1';
+        $userName = 'John Doe';
+
+        $this->encryptorMock
+            ->expects($this->once())
+            ->method('validateHash')
+            ->with($password, $this->model->getPassword())
+            ->willReturn($verifyIdentityResult);
+        $this->model->setIsActive(true);
+        $this->resourceMock->expects($this->any())->method('hasAssigned2Role')->willReturn(true);
+
+        $this->model->setUserName($userName);
+        $this->model->setLockExpires($lockExpires);
+
+        $this->eventManagerMock->expects($this->any())
+            ->method('dispatch')
+            ->with(
+                'admin_user_authenticate_after',
+                [
+                    'username' => $userName,
+                    'password' => $password,
+                    'user' => $this->model,
+                    'result' => $verifyIdentityResult
+                ]
+            )
+            ->willReturnSelf();
+
+        if ($lockExpires) {
+            $this->setExpectedException(
+                '\Magento\Framework\Exception\State\UserLockedException',
+                __('Your account is temporarily disabled.')
+            );
+        }
+
+        if (!$verifyIdentityResult) {
+            $this->setExpectedException(
+                '\Magento\Framework\Exception\AuthenticationException',
+                __('You have entered an invalid password for current user.')
+            );
+        }
+
+        $this->model->performIdentityCheck($password);
+    }
+
+    /**
+     * @return array
+     */
+    public function dataProviderPerformIdentityCheck()
+    {
+        return [
+            ['verifyIdentityResult' => true, 'lockExpires' => false],
+            ['verifyIdentityResult' => false, 'lockExpires' => false],
+            ['verifyIdentityResult' => true, 'lockExpires' => true],
+            ['verifyIdentityResult' => false, 'lockExpires' => true]
+        ];
     }
 }

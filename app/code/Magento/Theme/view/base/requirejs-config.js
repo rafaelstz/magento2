@@ -7,9 +7,10 @@ var config = {
     "waitSeconds": 0,
     "map": {
         "*": {
-            "mageUtils": "mage/utils/main",
             "ko": "knockoutjs/knockout",
-            "knockout": "knockoutjs/knockout"
+            "knockout": "knockoutjs/knockout",
+            "mageUtils": "mage/utils/main",
+            "rjsResolver": "mage/requirejs/resolver"
         }
     },
     "shim": {
@@ -44,7 +45,7 @@ var config = {
         "jquery/jquery.hashchange": "jquery/jquery.ba-hashchange.min",
         "prototype": "legacy-build.min",
         "jquery/jquery-storageapi": "jquery/jquery.storageapi.min",
-        "text": "requirejs/text",
+        "text": "mage/requirejs/text",
         "domReady": "requirejs/domReady",
         "tinymce": "tiny_mce/tiny_mce_src"
     },

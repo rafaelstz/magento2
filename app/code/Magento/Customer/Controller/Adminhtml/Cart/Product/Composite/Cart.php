@@ -16,6 +16,13 @@ use Magento\Framework\Exception\LocalizedException;
 abstract class Cart extends \Magento\Backend\App\Action
 {
     /**
+     * Authorization level of a basic admin session
+     *
+     * @see _isAllowed()
+     */
+    const ADMIN_RESOURCE = 'Magento_Customer::manage';
+
+    /**
      * Customer we're working with
      *
      * @var int id of the customer
@@ -37,19 +44,27 @@ abstract class Cart extends \Magento\Backend\App\Action
     protected $_quoteItem = null;
 
     /**
-     * @var \Magento\Quote\Model\QuoteRepository
+     * @var \Magento\Quote\Api\CartRepositoryInterface
      */
     protected $quoteRepository;
 
     /**
+     * @var \Magento\Quote\Model\QuoteFactory
+     */
+    protected $quoteFactory;
+
+    /**
      * @param Action\Context $context
-     * @param \Magento\Quote\Model\QuoteRepository $quoteRepository
+     * @param \Magento\Quote\Api\CartRepositoryInterface $quoteRepository
+     * @param \Magento\Quote\Model\QuoteFactory $quoteFactory
      */
     public function __construct(
         Action\Context $context,
-        \Magento\Quote\Model\QuoteRepository $quoteRepository
+        \Magento\Quote\Api\CartRepositoryInterface $quoteRepository,
+        \Magento\Quote\Model\QuoteFactory $quoteFactory
     ) {
         $this->quoteRepository = $quoteRepository;
+        $this->quoteFactory = $quoteFactory;
         parent::__construct($context);
     }
 
@@ -72,7 +87,7 @@ abstract class Cart extends \Magento\Backend\App\Action
         try {
             $this->_quote = $this->quoteRepository->getForCustomer($this->_customerId);
         } catch (\Magento\Framework\Exception\NoSuchEntityException $e) {
-            $this->_quote = $this->quoteRepository->create();
+            $this->_quote = $this->quoteFactory->create();
         }
         $this->_quote->setWebsite(
             $this->_objectManager->get('Magento\Store\Model\StoreManagerInterface')->getWebsite($websiteId)
@@ -84,15 +99,5 @@ abstract class Cart extends \Magento\Backend\App\Action
         }
 
         return $this;
-    }
-
-    /**
-     * Check the permission to Manage Customers
-     *
-     * @return bool
-     */
-    protected function _isAllowed()
-    {
-        return $this->_authorization->isAllowed('Magento_Customer::manage');
     }
 }

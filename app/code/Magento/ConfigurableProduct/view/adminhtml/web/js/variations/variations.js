@@ -48,17 +48,24 @@ define([
         },
         showGrid: function (rowIndex) {
             var product = this.productMatrix()[rowIndex],
-                attributes = JSON.parse(product.attribute);
+                attributes = JSON.parse(product.attribute),
+                filterModifier = product.productId ? {
+                    'entity_id': {
+                        'condition_type': 'neq', value: product.productId
+                    }
+                 } : {};
             this.rowIndexToEdit = rowIndex;
 
+            filterModifier = _.extend(filterModifier, _.mapObject(attributes, function (value) {
+                return {
+                    'condition_type': 'eq',
+                    'value': value
+                };
+            }));
             this.associatedProductGrid().open(
                 {
                     'filters': attributes,
-                    'filters_modifier': product.productId ? {
-                        'entity_id': {
-                            'condition_type': 'neq', value: product.productId
-                        }
-                    } : {}
+                    'filters_modifier': filterModifier
                 },
                 'changeProduct',
                 false
@@ -128,7 +135,9 @@ define([
             };
         },
         getProductValue: function (name) {
-            return $('[name="product[' + name.split('/').join('][') + ']"]', this.productForm).val();
+            name = name.split('/').join('][');
+
+            return $('[name="product[' + name + ']"]:enabled:not(.ignore-validate)', this.productForm).val();
         },
         getRowId: function (data, field) {
             var key = data.variationKey;
@@ -159,6 +168,7 @@ define([
             this.attributes(attributes);
             this.initImageUpload();
             this.disableConfigurableAttributes(attributes);
+            this.showPrice();
         },
         changeButtonWizard: function () {
             var $button = $('[data-action=open-steps-wizard] [data-role=button-label]');
@@ -212,6 +222,7 @@ define([
                     $('[data-attribute-code="' + attribute.code + '"] select').removeProp('disabled');
                 });
             }
+            this.showPrice();
         },
         toggleProduct: function (rowIndex) {
             var product, row, productChanged = {};
@@ -368,6 +379,16 @@ define([
                     .addClass('disabled-configurable-elements')
                     .prop('disabled', true);
             });
+        },
+        showPrice: function () {
+            var priceContainer = $('[id="attribute-price-container"]');
+            if (this.productMatrix().length !== 0) {
+                priceContainer.hide();
+                priceContainer.find('input').prop('disabled', true);
+            } else {
+                priceContainer.show();
+                priceContainer.find('input').prop('disabled', false);
+            }
         },
 
         /**
