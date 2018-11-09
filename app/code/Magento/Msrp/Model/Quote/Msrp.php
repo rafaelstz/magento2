@@ -16,6 +16,8 @@ class Msrp
     protected $canApplyMsrpData = [];
 
     /**
+     * Set if it can apply Msrp into the quote by ID
+     *
      * @param int $quoteId
      * @param bool $canApply
      * @return $this
@@ -27,6 +29,8 @@ class Msrp
     }
 
     /**
+     * Get Msrp permission to apply by ID
+     *
      * @param int $quoteId
      * @return bool
      * @SuppressWarnings(PHPMD.BooleanGetMethodName)
